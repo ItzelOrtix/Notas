@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memos</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+    <div class="nav-panel">
+        <div class="brand">Docket</div>
+
+        <div class="create-btn" onclick="showPalette()">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+        </div>
+
+        <div class="palette" id="paletteDots">
+            <div class="swatch gold" onclick="createMemo('gold')"></div>
+            <div class="swatch peach" onclick="createMemo('peach')"></div>
+            <div class="swatch lilac" onclick="createMemo('lilac')"></div>
+            <div class="swatch aqua" onclick="createMemo('aqua')"></div>
+            <div class="swatch mint" onclick="createMemo('mint')"></div>
+        </div>
+
+        <div class="clock-display">17:00:09</div>
+    </div>
+
+    <div class="workspace">
+        <div class="top-bar">
+            <div class="lookup-field">
+                <svg class="lookup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+                <input type="text" class="lookup-input" placeholder="Search">
+            </div>
+        </div>
+
+        <h1 class="heading">NOTES</h1>
+
+        <div class="memo-grid"></div>
+    </div>
+
+<script>
+    let memoCounter = 0;
+    let paletteOpen = false;
+
+    function showPalette() {
+        const palette = document.getElementById('paletteDots');
+        const createBtn = document.querySelector('.create-btn');
+
+        paletteOpen = !paletteOpen;
+
+        if (paletteOpen) {
+            palette.classList.add('visible');
+            createBtn.classList.add('active');
+        } else {
+            palette.classList.remove('visible');
+            createBtn.classList.remove('active');
+        }
+    }
+
+    function createMemo(color) {
+        const grid = document.querySelector('.memo-grid');
+        const card = document.createElement('div');
+        card.className = `memo-box ${color} appear`;
+
+        const now = new Date();
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const dateStr = `${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
+
+        card.innerHTML = `
+            <div class="memo-body">
+                Nueva nota - Haz clic para editar
+            </div>
+            <div class="memo-footer">
+                <div class="memo-date">${dateStr}</div>
+                <div class="memo-tools">
+                    <div class="tool-btn" onclick="enableEdit(this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </div>
+                    <div class="tool-btn remove-btn" onclick="removeMemo(this)">
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                            <line x1="18" y1="6" x2="6" y2="18" stroke="white" stroke-width="2"/>
+                            <line x1="6" y1="6" x2="18" y2="18" stroke="white" stroke-width="2"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
+        memoCounter++;
+    }
+
+    function removeMemo(element) {
+        const card = element.closest('.memo-box');
+        card.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => card.remove(), 300);
+    }
+
+    function enableEdit(element) {
+        const card = element.closest('.memo-box');
+        const content = card.querySelector('.memo-body');
+
+        content.contentEditable = true;
+        content.focus();
+
+        const range = document.createRange();
+        range.selectNodeContents(content);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        content.addEventListener('blur', () => content.contentEditable = false, { once: true });
+
+        content.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                content.blur();
+            }
+        }, { once: true });
+    }
+
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.9); }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+</body>
+</html>
